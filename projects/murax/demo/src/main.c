@@ -11,7 +11,7 @@ void main() {
 	prescaler_init(TIMER_PRESCALER);
 	timer_init(TIMER_A);
 
-	TIMER_PRESCALER->LIMIT = 12000-1; //1 ms rate
+	TIMER_PRESCALER->LIMIT = 50000-1; //1 ms rate
 
 	TIMER_A->LIMIT = 1000-1;  //1 second rate
 	TIMER_A->CLEARS_TICKS = 0x00010002;
