@@ -3,6 +3,14 @@
 #define PWM (*(volatile uint32_t*)0xF0030000)
 #define PERIOD (*(volatile uint32_t*)0xF0040000)
 #define DURATION (*(volatile uint32_t*)0xF0040004)
+#define BIT_ORDER (*(volatile uint32_t*)0xF0050004)
+#define BYTE_VALUE (*(volatile uint32_t*)0xF0050000)
+#define PRE_SCALE (*(volatile uint32_t*)0xF0050008)
+
+void shiftOut(int dataPin, int clockPin, int bitOrder, int value) {
+  BIT_ORDER = bitOrder;
+  BYTE_VALUE = value;
+}
 
 void analogWrite(int pin, int value) {
   PWM = value;
@@ -33,6 +41,7 @@ void setup() {
   LED = 0xFF;
   analogWrite(0, 127);
   tone(1, 262, 30000);
+  PRE_SCALE = 1000;
 }
 
 void loop()
@@ -43,6 +52,7 @@ void loop()
     if (ledState == 0) ledState = 0x0F;
     else ledState = ledState / 2;
     LED = ledState;
+    shiftOut(2, 3, 1, 0x45);
     print("\Blink\n");
   }
 }
