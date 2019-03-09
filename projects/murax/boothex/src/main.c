@@ -30,7 +30,7 @@ void main() {
 	GPIO_A->OUTPUT_ENABLE = 0x0000000F;
 	GPIO_A->OUTPUT = 0x00000000;
 
-	GPIO_A->OUTPUT |= 0x01; // Set Red LED
+	//GPIO_A->OUTPUT |= 0x01; // Set Red LED
 
         state = PROMPT;
 
@@ -87,6 +87,9 @@ void main() {
 			// Check SREC type
 			if (pos == 1) {
 				if (val >= 7 && val <= 9) { // Start address record
+					GPIO_A->OUTPUT = 0x00000000; // Switch off all Leds
+					// Drain the uart
+					while (UART->STATUS >> 24) c = UART->DATA;
 					__asm __volatile__(
 					"li s0, 0x80002000;"	/* 8K RAM top = stack address */
 					"mv ra, zero;"
@@ -120,7 +123,10 @@ void main() {
 			}
 
 			// Write byte to RAM
-			if (pos > len && (pos & 1) && pos < cnt) *cp++ = val;
+			if (pos > len && (pos & 1) && pos < cnt) {
+                          *cp++ = val;
+                        }
+                          
 		}
 	}
 }
