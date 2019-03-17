@@ -8,7 +8,8 @@
 #define NEXT 1
 #define LOOP 2
 
-#define IO_INTERRUPT (*(volatile uint32_t*)0x80002000)
+#define IO_TIMER_INTERRUPT (*(volatile uint32_t*)0x80002000)
+#define IO_PIN_INTERRUPT (*(volatile uint32_t*)0x80002004)
 
 static int c, cnt, pos, val, len;
 static char *cp;
@@ -135,12 +136,18 @@ void main() {
 
 void irqCallback(){
   if(TIMER_INTERRUPT->PENDINGS & 1){ 
-    if (IO_INTERRUPT != 0) {
-      void (*f)(void) = (void (*)(void)) IO_INTERRUPT;
+    if (IO_TIMER_INTERRUPT != 0) {
+      void (*f)(void) = (void (*)(void)) IO_TIMER_INTERRUPT;
       // Call the interrupt routine in the Arduino program
       f();
     }
     TIMER_INTERRUPT->PENDINGS = 1;
-  }  
+  } else {
+    if (IO_PIN_INTERRUPT != 0) {
+      void (*f)(void) = (void (*)(void)) IO_PIN_INTERRUPT;
+      // Call the interrupt routine in the Arduino program
+      f();
+    }
+  } 
 }
 
