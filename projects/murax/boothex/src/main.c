@@ -36,10 +36,24 @@ void main() {
 	//GPIO_A->OUTPUT |= 0x01; // Set Red LED
 
         state = PROMPT;
+	int cycles = 0;
 
 	// Loop reading characters from UART
         while (1) {
+                if (cycles++ == 1000000 && 
+                   (*(volatile uint32_t*)0x90000000) == 0x00001197)  { // If no input, start user program
+			base_addr = 0x90000000;
+			__asm __volatile__(
+                       		"li s0, 0x80002000;"    /* 8K RAM top = stack address */
+				"mv ra, zero;"
+				"jr %0;"
+				:
+				: "r" (base_addr)
+			);
+
+                }
 		if (UART->STATUS >> 24){         // UART RX interrupt?
+ 			cycles = 0; 
 			GPIO_A->OUTPUT ^= 0x02;  // Toggle Yellow Led
 
                         // Output prompt
