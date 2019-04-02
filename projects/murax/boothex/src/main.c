@@ -9,7 +9,8 @@
 #define LOOP 2
 
 #define IO_TIMER_INTERRUPT (*(volatile uint32_t*)0x80002000)
-#define IO_PIN_INTERRUPT (*(volatile uint32_t*)0x80002004)
+#define IO_PIN_INTERRUPT ((volatile uint32_t*)0x80002004)
+#define IO_PIN_INTERRUPT_PENDING (*(volatile uint32_t*)0xF00E0010)
 
 static int c, cnt, pos, val, len;
 static char *cp;
@@ -42,7 +43,7 @@ void main() {
         while (1) {
                 if (cycles++ == 1000000 && 
                    (*(volatile uint32_t*)0x90000000) == 0x00001197)  { // If no input, start user program
-			base_addr = 0x90000000;
+			base_addr = (void *) 0x90000000;
 			__asm __volatile__(
                        		"li s0, 0x80002000;"    /* 8K RAM top = stack address */
 				"mv ra, zero;"
@@ -156,11 +157,17 @@ void irqCallback(){
       f();
     }
     TIMER_INTERRUPT->PENDINGS = 1;
-  } else {
-    if (IO_PIN_INTERRUPT != 0) {
-      void (*f)(void) = (void (*)(void)) IO_PIN_INTERRUPT;
-      // Call the interrupt routine in the Arduino program
-      f();
+  }
+
+  for(int i=0;i<32;i++) {
+    uint32_t mask = (1 << i);
+    if (IO_PIN_INTERRUPT[i] != 0) {
+      if ((IO_PIN_INTERRUPT_PENDING & mask) != 0) {
+        void (*f)(void) = (void (*)(void)) (IO_PIN_INTERRUPT[i]);
+        // Call the interrupt routine in the Arduino program
+        f();
+        IO_PIN_INTERRUPT_PENDING |= mask;
+      }
     }
   } 
 }
