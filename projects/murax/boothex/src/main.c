@@ -16,6 +16,7 @@ static int c, cnt, pos, val, len;
 static char *cp;
 static void *base_addr = NULL;
 static int state;
+static int  echo = 0;
 
 void putch(char c) {
 	UART->DATA = c;
@@ -71,7 +72,7 @@ void main() {
 			}
 
 			c = (UART->DATA) & 0xFF; // Get character
-			putch(c);                // Echo character
+			if (echo) putch(c);                // Echo character
 
 			// Look for SREC
 			if (pos < 0) {
