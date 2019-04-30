@@ -46,7 +46,7 @@ void main() {
                    (*(volatile uint32_t*)0x90000000) == 0x00001197)  { // If no input, start user program
 			base_addr = (void *) 0x90000000;
 			__asm __volatile__(
-                       		"lui sp, 0x80003;"    /* 8K RAM top = stack address */
+                       		"lui sp, 0x80002;"    /* 8K RAM top = stack address */
 				"mv ra, zero;"
 				"jr %0;"
 				:
@@ -110,7 +110,7 @@ void main() {
 					// Drain the uart
 					while (UART->STATUS >> 24) c = UART->DATA;
 					__asm __volatile__(
-					"lui sp, 0x80003;"	/* 8K RAM top = stack address */
+					"lui sp, 0x80002;"	/* 8K RAM top = stack address */
 					"mv ra, zero;"
 					"jr %0;"
 					: 
