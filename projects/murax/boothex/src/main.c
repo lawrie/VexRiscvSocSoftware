@@ -42,8 +42,11 @@ void main() {
 
 	// Loop reading characters from UART
         while (1) {
-                if (cycles++ == 1000000 && 
-                   (*(volatile uint32_t*)0x90000000) == 0x00001197)  { // If no input, start user program
+	        //GPIO_A->OUTPUT |= 0x04; // Set Green LED
+                //if (cycles > 1000000) GPIO_A->OUTPUT |= 0x08;
+                if (cycles++ >= 1000000 && 
+                   ((*(volatile uint32_t*)0x90000000) & 0xfff) == 0x197)  { // If no input, start user program
+	                GPIO_A->OUTPUT = 0x00; 
 			base_addr = (void *) 0x90000000;
 			__asm __volatile__(
                        		"lui sp, 0x80002;"    /* 8K RAM top = stack address */
@@ -56,7 +59,7 @@ void main() {
                 }
 		if (UART->STATUS >> 24){         // UART RX interrupt?
  			cycles = 0; 
-			GPIO_A->OUTPUT ^= 0x02;  // Toggle Yellow Led
+			GPIO_A->OUTPUT |= 0x02;  // Set Yellow Led
 
                         // Output prompt
 			if (state == PROMPT) { 
